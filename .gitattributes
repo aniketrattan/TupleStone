@@ -1,0 +1,6 @@
+# LF in the repository for everything textual. The tree is built on Linux and
+# Windows both, and clang-format's CI check runs on Linux; a CRLF checkout on a
+# Windows machine must not turn into a whole-file diff.
+* text=auto eol=lf
+*.png binary
+*.slt text eol=lf

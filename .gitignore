@@ -1,0 +1,9 @@
+build/
+out/
+.cache/
+.vscode/
+.idea/
+compile_commands.json
+*.db
+*.db.wal
+docs/bench/scratch/
