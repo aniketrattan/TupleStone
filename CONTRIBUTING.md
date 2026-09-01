@@ -10,9 +10,10 @@ Read this before writing any code in this repository.
 3. Check `docs/design/` to see which milestones are already done. The highest-numbered note there is
    the last completed milestone.
 
-**Implement exactly one milestone per session. Never skip ahead.** If M5 is not done, do not start
-M6, even if M6 looks more interesting. The dependency order in PLAN.md is real: skipped foundations
-resurface as unexplainable corruption two milestones later.
+**Never skip ahead.** If M5 is not done, do not start M6, even if M6 looks more interesting. The
+dependency order in PLAN.md is real: skipped foundations resurface as unexplainable corruption two
+milestones later. Chaining several milestones in one sitting is fine — finishing each one against
+the checklist below before starting the next is not optional.
 
 ## Definition of done
 
