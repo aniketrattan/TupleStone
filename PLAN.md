@@ -56,9 +56,6 @@ Thirteen milestones, M0–M12. Each one names its goal, the modules it introduce
 criterion**: a concrete test that must pass before the milestone is done. Each also requires a design
 note at `docs/design/NN-<name>.md` recording what was built and anything surprising that was learned.
 
-Do exactly one milestone at a time. Do not start the next until the current one's exit criterion is
-green.
-
 ---
 
 ### M0 — Skeleton
