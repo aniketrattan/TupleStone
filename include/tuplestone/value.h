@@ -43,6 +43,10 @@ class Value {
   Value(std::string value) : value_(std::move(value)) {}  // NOLINT(google-explicit-constructor)
   Value(std::string_view value) : value_(std::string(value)) {}  // NOLINT
   Value(Blob value) : value_(std::move(value)) {}  // NOLINT(google-explicit-constructor)
+  Value(const Value& other);
+  Value& operator=(const Value& other);
+  Value(Value&& other) noexcept = default;
+  Value& operator=(Value&& other) noexcept = default;
 
   static Value Null() { return Value(); }
   static Value Boolean(bool value) { return Value(value); }

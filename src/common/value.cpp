@@ -11,6 +11,53 @@
 
 namespace tuplestone {
 
+Value::Value(const Value& other) : value_(std::monostate{}) {
+  switch (other.type()) {
+    case TypeId::kNull:
+      break;
+    case TypeId::kBoolean:
+      value_.emplace<bool>(other.AsBoolean());
+      break;
+    case TypeId::kInteger:
+      value_.emplace<int64_t>(other.AsInteger());
+      break;
+    case TypeId::kReal:
+      value_.emplace<double>(other.AsReal());
+      break;
+    case TypeId::kText:
+      value_.emplace<std::string>(other.AsText());
+      break;
+    case TypeId::kBlob:
+      value_.emplace<Blob>(other.AsBlob());
+      break;
+  }
+}
+
+Value& Value::operator=(const Value& other) {
+  if (this == &other) return *this;
+  switch (other.type()) {
+    case TypeId::kNull:
+      value_.emplace<std::monostate>();
+      break;
+    case TypeId::kBoolean:
+      value_.emplace<bool>(other.AsBoolean());
+      break;
+    case TypeId::kInteger:
+      value_.emplace<int64_t>(other.AsInteger());
+      break;
+    case TypeId::kReal:
+      value_.emplace<double>(other.AsReal());
+      break;
+    case TypeId::kText:
+      value_.emplace<std::string>(other.AsText());
+      break;
+    case TypeId::kBlob:
+      value_.emplace<Blob>(other.AsBlob());
+      break;
+  }
+  return *this;
+}
+
 const char* TypeIdName(TypeId type) {
   switch (type) {
     case TypeId::kNull:
