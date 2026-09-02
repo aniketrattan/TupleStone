@@ -4,16 +4,14 @@ Read this before writing any code in this repository.
 
 ## Orientation
 
-1. Read [PLAN.md](PLAN.md) — what is being built and in what order.
-2. Read [ARCHITECTURE.md](ARCHITECTURE.md) — the frozen design: file formats, protocols, invariants,
+1. Read [ARCHITECTURE.md](ARCHITECTURE.md) — the frozen design: file formats, protocols, invariants,
    SQL grammar, public API.
-3. Check `docs/design/` to see which milestones are already done. The highest-numbered note there is
+2. Check `docs/design/` to see which milestones are already done. The highest-numbered note there is
    the last completed milestone.
 
 **Never skip ahead.** If M5 is not done, do not start M6, even if M6 looks more interesting. The
-dependency order in PLAN.md is real: skipped foundations resurface as unexplainable corruption two
-milestones later. Chaining several milestones in one sitting is fine — finishing each one against
-the checklist below before starting the next is not optional.
+dependency order is real: skipped foundations resurface as unexplainable corruption two milestones
+later. Finish each milestone against the checklist below before starting dependent work.
 
 ## Definition of done
 
@@ -21,7 +19,7 @@ A milestone is not done when the feature works. It is done when **all** of these
 
 - [ ] Implementation complete, matching the formats and protocols in ARCHITECTURE.md exactly.
 - [ ] Unit tests in `tests/unit/<module>_test.cpp`, written in the same commit as the code.
-- [ ] The milestone's **exit criterion** from PLAN.md passes — that specific test, not a substitute.
+- [ ] The milestone's documented **exit criterion** passes — that specific test, not a substitute.
 - [ ] `ctest` green under the `debug`, `release`, `asan`, and `ubsan` presets.
 - [ ] `tsan` preset green for anything touching concurrency (buffer pool, B+Tree, txn manager, WAL).
 - [ ] All previously passing tests still pass, including the `.slt` suite once it exists.
@@ -71,13 +69,13 @@ the latch is released before the log append is essential.
 ARCHITECTURE.md is frozen. If implementation reveals that a decision in it is wrong — and this will
 happen at least once, most likely in M6 or M7 — then:
 
-1. **Stop and ask the human.** Do not silently deviate and do not silently work around it.
+1. **Stop and ask the maintainer.** Do not silently deviate and do not silently work around it.
 2. If the change is approved, write `docs/adr/NNNN-<title>.md`: context, the decision, the
    alternatives considered, and the consequences.
 3. Update ARCHITECTURE.md to the new decision, and link the ADR from it.
 
 An implementation that quietly disagrees with ARCHITECTURE.md is worse than either option, because
-the next agent will trust the document.
+future contributors will trust the document.
 
 ## Testing rules
 
@@ -104,8 +102,8 @@ the next agent will trust the document.
 
 ## Working style
 
-- When something is ambiguous between PLAN.md and ARCHITECTURE.md, ARCHITECTURE.md wins on *how* and
-  PLAN.md wins on *what* and *when*.
+- When implementation details are ambiguous, ARCHITECTURE.md wins on invariants and interfaces;
+  record scope and sequencing decisions in the relevant design note.
 - Prefer boring, readable code over clever code. This project is read by humans as a portfolio piece;
   a clear B+Tree beats a fast unreadable one.
 - Before adding a helper, grep `src/common/` — the primitive you want probably exists.

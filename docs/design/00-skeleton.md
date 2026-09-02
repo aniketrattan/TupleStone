@@ -85,7 +85,7 @@ warning set, which is a fair complaint; the test asserts `StringPrintf("%s", "")
 ## Known gaps
 
 These are honest gaps, not oversights. Each is a real environment constraint on the verified
-toolchain (CMake 4.4.2, g++ 14.2.0, MSYS2 UCRT64) named in PLAN.md.
+toolchain (CMake 4.4.2, g++ 14.2.0, MSYS2 UCRT64) used by the current build and CI configuration.
 
 1. **The `asan`, `ubsan`, and `tsan` presets have never been run.** MinGW GCC ships no sanitizer
    runtimes — `-fsanitize=address|undefined|thread` all fail to link. `CMakeLists.txt` detects this

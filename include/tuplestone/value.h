@@ -1,5 +1,5 @@
 // The SQL value model. The full Value type — three-valued logic, coercion rules,
-// and the memcomparable key encoding — is built in M4 (PLAN.md). This header
+// and the memcomparable key encoding — is built in the values milestone. This header
 // exists from M0 because db.h's public signatures name Value and Schema, and
 // ARCHITECTURE.md §12 freezes that surface before anything implements it.
 #ifndef TUPLESTONE_VALUE_H_

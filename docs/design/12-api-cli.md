@@ -14,5 +14,5 @@ from stdin, prints column headings and row values, and supports `.tables`, `.sch
 TupleStone's public name and on-disk identity are now established together, so future renames
 must be treated as compatibility changes.
 
-Known follow-up work is tracked in `PLAN.md`: page-backed heap/index integration, full ARIES WAL
-recovery, joins and grouped aggregates, external sorting, and the sanitizer/fuzz/crash harnesses.
+Known follow-up work includes page-backed heap/index integration, full ARIES WAL recovery, joins and
+grouped aggregates, external sorting, and the sanitizer/fuzz/crash harnesses.

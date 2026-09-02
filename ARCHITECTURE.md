@@ -1,9 +1,9 @@
 # TupleStone — Architecture
 
 **This document is the frozen technical design.** Its job is to stop every future contributor from
-re-litigating decisions that have already been made. If you are implementing a milestone from
-[PLAN.md](PLAN.md), the formats, protocols, and invariants you need are here — you should never have
-to invent a page layout or a log record format yourself.
+re-litigating decisions that have already been made. If you are implementing a milestone, the
+formats, protocols, and invariants you need are here — you should never have to invent a page layout
+or a log record format yourself.
 
 Changing anything in this document requires an ADR in `docs/adr/NNNN-<title>.md` and explicit human
 approval. See [CONTRIBUTING.md](CONTRIBUTING.md).
@@ -56,7 +56,7 @@ dependencies fail to link.
 
 ```
 d:\Database\
-├─ PLAN.md ARCHITECTURE.md CONTRIBUTING.md README.md
+├─ ARCHITECTURE.md CONTRIBUTING.md README.md
 ├─ CMakeLists.txt  CMakePresets.json  .clang-format  .clang-tidy  .gitignore
 ├─ include/tuplestone/          # PUBLIC headers only — the embedded API surface
 │    db.h  status.h  value.h
