@@ -838,7 +838,7 @@ void RefreshCatalog(Tables* tables) {
   for (const auto& [name, table] : *tables) {
     if (name.rfind("tuplestone_", 0) == 0) continue;
     (*tables)["tuplestone_tables"].rows.push_back({Value(table_id), Value(name), Value(int64_t{0}),
-                                                Value(static_cast<int64_t>(table.rows.size()))});
+                                                   Value(static_cast<int64_t>(table.rows.size()))});
     for (size_t ordinal = 0; ordinal < table.schema.size(); ++ordinal) {
       const Column& column = table.schema[ordinal];
       (*tables)["tuplestone_columns"].rows.push_back(

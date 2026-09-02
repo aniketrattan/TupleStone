@@ -18,6 +18,10 @@ namespace {
 constexpr uint8_t kFormatVersion = 1;
 constexpr char kMagic[] = "TSTONE01";
 
+std::streamoff PageOffset(page_id_t page_id) {
+  return static_cast<std::streamoff>(page_id) * static_cast<std::streamoff>(kPageSize);
+}
+
 Status IoFailure(const char* operation, const std::string& path) {
   return IoError(std::string(operation) + " failed for " + path);
 }
@@ -127,7 +131,7 @@ StatusOr<page_id_t> DiskManager::AllocatePage() {
   page_id_t result = free_list_head_;
   if (result != kInvalidPageId) {
     std::array<uint8_t, kPageSize> bytes{};
-    file_.seekg(static_cast<std::streamoff>(result) * kPageSize);
+    file_.seekg(PageOffset(result));
     file_.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
     if (!file_) {
       file_.clear();
@@ -157,7 +161,7 @@ Status DiskManager::ReadPage(page_id_t page_id, Page* page) {
   std::lock_guard lock(mutex_);
   TUPLESTONE_RETURN_IF_ERROR(EnsurePageLocked(page_id));
   std::array<uint8_t, kPageSize> bytes{};
-  file_.seekg(static_cast<std::streamoff>(page_id) * kPageSize);
+  file_.seekg(PageOffset(page_id));
   file_.read(reinterpret_cast<char*>(bytes.data()), static_cast<std::streamsize>(bytes.size()));
   if (!file_) {
     file_.clear();
@@ -181,7 +185,7 @@ Status DiskManager::WritePageLocked(page_id_t page_id, const Page& page) {
   std::array<uint8_t, kPageSize> bytes{};
   std::memcpy(bytes.data(), page.data(), bytes.size());
   if (page_id != kHeaderPageId) StoreU32LE(bytes.data(), Crc32c(bytes.data() + 4, 4092));
-  file_.seekp(static_cast<std::streamoff>(page_id) * kPageSize);
+  file_.seekp(PageOffset(page_id));
   file_.write(reinterpret_cast<const char*>(bytes.data()),
               static_cast<std::streamsize>(bytes.size()));
   if (!file_) {

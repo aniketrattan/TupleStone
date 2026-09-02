@@ -58,7 +58,7 @@ jobs:
 
       - name: Benchmark smoke
         if: matrix.compiler == 'gcc' && matrix.preset == 'release'
-        run: build/release/bin/nanosql_bench ci-bench.db 1000
+        run: build/release/bin/tuplestone_bench ci-bench.db 1000
 
   windows:
     name: windows msys2 ucrt64 / ${{ matrix.preset }}

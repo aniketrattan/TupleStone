@@ -1,4 +1,4 @@
-# CONTRIBUTING.md — rules for agents working on TupleStone
+# CONTRIBUTING.md — rules for working on TupleStone
 
 Read this before writing any code in this repository.
 

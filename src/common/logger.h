@@ -72,12 +72,13 @@ std::string StringPrintf(const char* format, ...) TUPLESTONE_PRINTF_FORMAT(1, 2)
 
 // The level test happens before the arguments are evaluated, so a disabled log
 // statement costs one comparison and never formats anything.
-#define TUPLESTONE_LOG(level_enum, ...)                                                           \
-  do {                                                                                         \
-    ::tuplestone::Logger& _tuplestone_lg = ::tuplestone::Logger::Global();                              \
-    if (_tuplestone_lg.Enabled(level_enum)) {                                                     \
-      _tuplestone_lg.Log((level_enum), __FILE__, __LINE__, ::tuplestone::StringPrintf(__VA_ARGS__)); \
-    }                                                                                          \
+#define TUPLESTONE_LOG(level_enum, ...)                                    \
+  do {                                                                     \
+    ::tuplestone::Logger& _tuplestone_lg = ::tuplestone::Logger::Global(); \
+    if (_tuplestone_lg.Enabled(level_enum)) {                              \
+      _tuplestone_lg.Log((level_enum), __FILE__, __LINE__,                 \
+                         ::tuplestone::StringPrintf(__VA_ARGS__));         \
+    }                                                                      \
   } while (0)
 
 #define TUPLESTONE_LOG_TRACE(...) TUPLESTONE_LOG(::tuplestone::LogLevel::kTrace, __VA_ARGS__)

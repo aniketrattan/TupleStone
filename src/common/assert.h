@@ -20,10 +20,10 @@ namespace tuplestone::internal {
 }  // namespace tuplestone::internal
 
 #define TUPLESTONE_ASSERT(expr, message)                                                       \
-  do {                                                                                      \
-    if (!(expr)) [[unlikely]] {                                                             \
+  do {                                                                                         \
+    if (!(expr)) [[unlikely]] {                                                                \
       ::tuplestone::internal::AssertionFailed(__FILE__, __LINE__, __func__, #expr, (message)); \
-    }                                                                                       \
+    }                                                                                          \
   } while (0)
 
 #define TUPLESTONE_UNREACHABLE(message) \
@@ -35,9 +35,9 @@ namespace tuplestone::internal {
 // The expression must still parse and typecheck, so it cannot rot while
 // paranoid builds are switched off. `sizeof` gives that without evaluating it.
 #define TUPLESTONE_PARANOID_ASSERT(expr, message) \
-  do {                                         \
-    (void)sizeof((expr) ? 1 : 0);              \
-    (void)sizeof(message);                     \
+  do {                                            \
+    (void)sizeof((expr) ? 1 : 0);                 \
+    (void)sizeof(message);                        \
   } while (0)
 #endif
 

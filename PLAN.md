@@ -8,7 +8,7 @@ each step. Companion documents:
 
 - [ARCHITECTURE.md](ARCHITECTURE.md) — frozen technical decisions (file formats, protocols,
   invariants, SQL grammar). Read this before writing any code.
-- [CONTRIBUTING.md](CONTRIBUTING.md) — rules of engagement for implementing agents.
+- [CONTRIBUTING.md](CONTRIBUTING.md) — rules of engagement for contributors.
 
 ---
 

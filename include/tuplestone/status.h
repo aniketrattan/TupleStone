@@ -78,7 +78,7 @@ class Status {
 };
 
 // Named constructors. These read better at call sites than Status(kFoo, "...").
-#define TUPLESTONE_DEFINE_STATUS_FACTORY(Name)                     \
+#define TUPLESTONE_DEFINE_STATUS_FACTORY(Name)                  \
   inline Status Name(std::string_view message) {                \
     return Status(StatusCode::k##Name, message);                \
   }                                                             \
@@ -134,14 +134,14 @@ class StatusOr {
 // sharing a StatusOr return type with queries.
 void StatusOrRejectOk();
 #define TUPLESTONE_STATUSOR_REQUIRE_NOT_OK(s)       \
-  do {                                           \
+  do {                                              \
     if ((s).ok()) ::tuplestone::StatusOrRejectOk(); \
   } while (0)
 
 // Early-return helpers. TUPLESTONE_RETURN_IF_ERROR(expr) propagates a failure;
 // TUPLESTONE_ASSIGN_OR_RETURN(decl, expr) unwraps a StatusOr or propagates.
-#define TUPLESTONE_RETURN_IF_ERROR(expr)          \
-  do {                                         \
+#define TUPLESTONE_RETURN_IF_ERROR(expr)             \
+  do {                                               \
     ::tuplestone::Status _tuplestone_st = (expr);    \
     if (!_tuplestone_st.ok()) return _tuplestone_st; \
   } while (0)
@@ -149,7 +149,7 @@ void StatusOrRejectOk();
 #define TUPLESTONE_CONCAT_INNER(a, b) a##b
 #define TUPLESTONE_CONCAT(a, b) TUPLESTONE_CONCAT_INNER(a, b)
 
-#define TUPLESTONE_ASSIGN_OR_RETURN(decl, expr)                \
+#define TUPLESTONE_ASSIGN_OR_RETURN(decl, expr)                   \
   auto TUPLESTONE_CONCAT(_tuplestone_or_, __LINE__) = (expr);     \
   if (!TUPLESTONE_CONCAT(_tuplestone_or_, __LINE__).ok())         \
     return TUPLESTONE_CONCAT(_tuplestone_or_, __LINE__).status(); \

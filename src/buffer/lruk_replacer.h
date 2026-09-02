@@ -2,13 +2,14 @@
 #define TUPLESTONE_BUFFER_LRUK_REPLACER_H_
 #include <cstddef>
 #include <cstdint>
+#include <deque>
 #include <mutex>
 #include <optional>
 #include <unordered_map>
 namespace tuplestone {
 class LRUKReplacer {
  public:
-  LRUKReplacer(size_t capacity, size_t k = 2) : capacity_(capacity), k_(k) {}
+  LRUKReplacer(size_t capacity, size_t k = 2) : capacity_(capacity), k_(k == 0 ? 1 : k) {}
   void RecordAccess(size_t frame_id);
   void SetEvictable(size_t frame_id, bool evictable);
   std::optional<size_t> Evict();
@@ -17,7 +18,7 @@ class LRUKReplacer {
 
  private:
   struct Entry {
-    uint64_t last = 0;
+    std::deque<uint64_t> accesses;
     bool evictable = false;
   };
   size_t capacity_;

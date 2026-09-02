@@ -56,7 +56,8 @@ int main(int argc, char** argv) {
   auto result = (*connection)->Query("SELECT COUNT(*) FROM bench WHERE score >= 500");
   if (!result.ok()) return Fail(result.status());
   if (const auto next = result->Next(); !next.ok() || !*next) {
-    return Fail(next.ok() ? tuplestone::Internal("benchmark query returned no row") : next.status());
+    return Fail(next.ok() ? tuplestone::Internal("benchmark query returned no row")
+                          : next.status());
   }
   const int64_t matched = result->Get(0).AsInteger();
   const auto query_elapsed =

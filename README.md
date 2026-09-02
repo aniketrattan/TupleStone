@@ -30,7 +30,7 @@ Three documents, in reading order:
 |---|---|
 | [PLAN.md](PLAN.md) | The roadmap: thirteen milestones, what each builds, and its exit criterion |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | The frozen design: file formats, protocols, invariants, SQL grammar |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | Rules of engagement for anyone (or anything) writing code here |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Rules of engagement for contributors |
 
 The layers depend strictly downward, and the CMake link graph is what enforces it:
 
