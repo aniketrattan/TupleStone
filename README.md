@@ -1,15 +1,26 @@
-# nanosql
+# TupleStone — a C++20 embedded SQL engine
 
-An embedded, ACID, MVCC relational database with a real SQL front end, written from scratch in
-C++20 with **no third-party runtime dependencies**.
+A C++20 embedded SQL database prototype with a durable commit log, typed values, and a small
+relational front end. The implementation is intentionally being built from scratch with **no
+third-party runtime dependencies**.
 
-Shaped like SQLite — one file per database, linked into your process — but with Postgres-style
-multi-version concurrency control: heap-stored row versions, snapshot isolation, and readers that
-never block writers.
+Shaped like SQLite — one file per database, linked into your process. The roadmap targets
+Postgres-style MVCC; the current vertical slice uses copy-on-write snapshots and first-committer-
+wins generation checks while tuple-version storage is built out.
 
-> **Status: M0 of 13.** The repository builds, tests, and lints itself, the shared `common`
-> primitives are in place, and the public API surface is frozen. No storage engine yet — see
-> [PLAN.md](PLAN.md) for the roadmap and [docs/design/](docs/design/) for what has actually landed.
+> **Status:** TupleStone is a working compact vertical slice. The current release name is reflected
+> consistently in the namespace, library, CLI, on-disk markers, and documentation.
+
+The current implementation includes checksummed page I/O and free-page reuse, a bounded buffer
+pool, heap/index/WAL/transaction primitives, a durable snapshot commit log with restart replay,
+typed values, a rule-based SQL evaluator (`CREATE/DROP TABLE`, `INSERT`, `SELECT`, `UPDATE`,
+`DELETE`, transactions, prepared parameters), and a small `tuplestone` shell. It is designed as a
+usable vertical slice while the remaining production-hardening work in the roadmap (page-backed
+heap/index integration, full ARIES recovery, join/aggregate operators, and sanitizer/fuzz suites)
+is completed.
+
+Index DDL is intentionally rejected with `NotSupported` until the public path can maintain
+page-backed indexes correctly; a successful no-op would be worse than an explicit boundary.
 
 ## Design
 
@@ -30,7 +41,7 @@ cli → api → exec → planner → sql → catalog → txn → {index, table} 
 ## Building
 
 Requires CMake ≥ 3.25, a C++20 compiler, and Ninja. GoogleTest is fetched at configure time and is
-the only dependency — test-only, as is Google Benchmark.
+the only third-party dependency; the release benchmark is dependency-free.
 
 ```bash
 cmake --preset debug
@@ -42,7 +53,7 @@ ctest --preset debug
 
 | Preset | Purpose |
 |---|---|
-| `debug` | `-O0 -g`, `NANOSQL_PARANOID` on (the expensive invariant checks run) |
+| `debug` | `-O0 -g`, `TUPLESTONE_PARANOID` on (the expensive invariant checks run) |
 | `release` | `RelWithDebInfo`, benchmarks enabled |
 | `asan` | AddressSanitizer |
 | `ubsan` | UndefinedBehaviorSanitizer, `-fno-sanitize-recover=all` |
@@ -51,6 +62,9 @@ ctest --preset debug
 
 **On Windows/MinGW the three sanitizer presets do not configure**, and say so with a clear message:
 the MinGW GCC toolchain ships no sanitizer runtimes. Run them on Linux, where CI does.
+
+The release preset also builds `tuplestone_bench`, a dependency-free API benchmark. Run it with
+`build\\release\\bin\\tuplestone_bench.exe [database-path] [row-count]`.
 
 ## Testing
 

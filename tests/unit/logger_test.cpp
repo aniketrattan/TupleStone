@@ -8,7 +8,7 @@
 
 #include <gtest/gtest.h>
 
-namespace nanosql {
+namespace tuplestone {
 namespace {
 
 // Captures the global logger's output to an in-memory buffer for the duration
@@ -47,7 +47,7 @@ class CaptureLog {
 
 TEST(LoggerTest, LevelNamesRoundTripThroughTheParser) {
   const std::vector<LogLevel> levels = {LogLevel::kTrace, LogLevel::kDebug, LogLevel::kInfo,
-                                        LogLevel::kWarn, LogLevel::kError, LogLevel::kOff};
+                                        LogLevel::kWarn,  LogLevel::kError, LogLevel::kOff};
   for (const LogLevel level : levels) {
     LogLevel parsed = LogLevel::kInfo;
     ASSERT_TRUE(ParseLogLevel(LogLevelName(level), &parsed)) << LogLevelName(level);
@@ -69,7 +69,7 @@ TEST(LoggerTest, ParseIsCaseInsensitiveAndRejectsGarbage) {
 
 TEST(LoggerTest, WritesLevelFileLineAndMessage) {
   CaptureLog capture(LogLevel::kTrace);
-  NANOSQL_LOG_WARN("disk %s after %d retries", "gave up", 3);
+  TUPLESTONE_LOG_WARN("disk %s after %d retries", "gave up", 3);
   const std::string text = capture.Text();
   EXPECT_NE(text.find("WARN"), std::string::npos) << text;
   EXPECT_NE(text.find("logger_test.cpp"), std::string::npos) << text;
@@ -78,9 +78,9 @@ TEST(LoggerTest, WritesLevelFileLineAndMessage) {
 
 TEST(LoggerTest, SuppressesRecordsBelowTheLevel) {
   CaptureLog capture(LogLevel::kWarn);
-  NANOSQL_LOG_DEBUG("this must not appear");
-  NANOSQL_LOG_INFO("nor this");
-  NANOSQL_LOG_ERROR("but this must");
+  TUPLESTONE_LOG_DEBUG("this must not appear");
+  TUPLESTONE_LOG_INFO("nor this");
+  TUPLESTONE_LOG_ERROR("but this must");
   const std::string text = capture.Text();
   EXPECT_EQ(text.find("must not appear"), std::string::npos) << text;
   EXPECT_EQ(text.find("nor this"), std::string::npos) << text;
@@ -89,7 +89,7 @@ TEST(LoggerTest, SuppressesRecordsBelowTheLevel) {
 
 TEST(LoggerTest, OffSuppressesEverything) {
   CaptureLog capture(LogLevel::kOff);
-  NANOSQL_LOG_ERROR("silence");
+  TUPLESTONE_LOG_ERROR("silence");
   EXPECT_TRUE(capture.Text().empty());
 }
 
@@ -102,9 +102,9 @@ TEST(LoggerTest, DisabledRecordDoesNotEvaluateArguments) {
     ++side_effects;
     return 1;
   };
-  NANOSQL_LOG_DEBUG("%d", counted());
+  TUPLESTONE_LOG_DEBUG("%d", counted());
   EXPECT_EQ(side_effects, 0);
-  NANOSQL_LOG_ERROR("%d", counted());
+  TUPLESTONE_LOG_ERROR("%d", counted());
   EXPECT_EQ(side_effects, 1);
 }
 
@@ -118,7 +118,7 @@ TEST(LoggerTest, ConcurrentRecordsAreNotInterleaved) {
   for (int t = 0; t < kThreads; ++t) {
     threads.emplace_back([t]() {
       for (int i = 0; i < kPerThread; ++i) {
-        NANOSQL_LOG_INFO("thread=%d seq=%d payload=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", t, i);
+        TUPLESTONE_LOG_INFO("thread=%d seq=%d payload=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA", t, i);
       }
     });
   }
@@ -153,4 +153,4 @@ TEST(StringPrintfTest, FormatsWithoutTruncation) {
 }
 
 }  // namespace
-}  // namespace nanosql
+}  // namespace tuplestone

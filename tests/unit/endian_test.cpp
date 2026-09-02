@@ -8,12 +8,12 @@
 
 #include <gtest/gtest.h>
 
-namespace nanosql {
+namespace tuplestone {
 namespace {
 
 // Deterministic by construction. ARCHITECTURE-adjacent rule from CONTRIBUTING.md:
 // every RNG is explicitly seeded and the seed is printed on failure.
-constexpr uint64_t kSeed = 0x6E616E6F73716C31ull;  // "nanosql1"
+constexpr uint64_t kSeed = 0x5455504C45535431ull;  // "TUPLEST1"
 
 // The point of these helpers is that the byte order is fixed by the format, not
 // by the host. Asserting the exact bytes is what makes that testable.
@@ -66,8 +66,8 @@ TEST(EndianTest, RoundTripsBoundaryValues) {
     StoreU32BE(buf, v);
     EXPECT_EQ(LoadU32BE(buf), v);
   }
-  for (const uint64_t v : {0ull, 1ull, 0x7FFFFFFFFFFFFFFFull, 0x8000000000000000ull,
-                           0xFFFFFFFFFFFFFFFFull}) {
+  for (const uint64_t v :
+       {0ull, 1ull, 0x7FFFFFFFFFFFFFFFull, 0x8000000000000000ull, 0xFFFFFFFFFFFFFFFFull}) {
     StoreU64LE(buf, v);
     EXPECT_EQ(LoadU64LE(buf), v);
     StoreU64BE(buf, v);
@@ -77,13 +77,13 @@ TEST(EndianTest, RoundTripsBoundaryValues) {
 
 TEST(EndianTest, SignedRoundTripsIncludingNegatives) {
   uint8_t buf[8] = {};
-  for (const int64_t v : {std::numeric_limits<int64_t>::min(), int64_t{-1}, int64_t{0},
-                          int64_t{1}, std::numeric_limits<int64_t>::max()}) {
+  for (const int64_t v : {std::numeric_limits<int64_t>::min(), int64_t{-1}, int64_t{0}, int64_t{1},
+                          std::numeric_limits<int64_t>::max()}) {
     StoreI64LE(buf, v);
     EXPECT_EQ(LoadI64LE(buf), v);
   }
-  for (const int32_t v : {std::numeric_limits<int32_t>::min(), -1, 0, 1,
-                          std::numeric_limits<int32_t>::max()}) {
+  for (const int32_t v :
+       {std::numeric_limits<int32_t>::min(), -1, 0, 1, std::numeric_limits<int32_t>::max()}) {
     StoreI32LE(buf, v);
     EXPECT_EQ(LoadI32LE(buf), v);
   }
@@ -91,11 +91,16 @@ TEST(EndianTest, SignedRoundTripsIncludingNegatives) {
 
 TEST(EndianTest, DoubleRoundTripsIncludingSpecialValues) {
   uint8_t buf[8] = {};
-  const std::vector<double> values = {
-      0.0, -0.0, 1.0, -1.0, 3.14159265358979,
-      std::numeric_limits<double>::min(), std::numeric_limits<double>::max(),
-      std::numeric_limits<double>::denorm_min(),
-      std::numeric_limits<double>::infinity(), -std::numeric_limits<double>::infinity()};
+  const std::vector<double> values = {0.0,
+                                      -0.0,
+                                      1.0,
+                                      -1.0,
+                                      3.14159265358979,
+                                      std::numeric_limits<double>::min(),
+                                      std::numeric_limits<double>::max(),
+                                      std::numeric_limits<double>::denorm_min(),
+                                      std::numeric_limits<double>::infinity(),
+                                      -std::numeric_limits<double>::infinity()};
   for (const double v : values) {
     StoreF64LE(buf, v);
     EXPECT_EQ(LoadF64LE(buf), v) << v;
@@ -151,4 +156,4 @@ TEST(EndianTest, DoubleBitsRoundTrip) {
 }
 
 }  // namespace
-}  // namespace nanosql
+}  // namespace tuplestone

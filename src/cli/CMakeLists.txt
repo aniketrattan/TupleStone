@@ -1,0 +1,3 @@
+add_executable(tuplestone_cli main.cpp)
+set_target_properties(tuplestone_cli PROPERTIES OUTPUT_NAME tuplestone)
+target_link_libraries(tuplestone_cli PRIVATE tuplestone tuplestone_options)

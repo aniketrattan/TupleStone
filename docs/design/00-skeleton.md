@@ -1,20 +1,21 @@
-# M0 — Skeleton
+# M0 — Skeleton (historical baseline)
 
 **Status:** complete. Exit criterion met on the two presets this machine can run; see
 [Known gaps](#known-gaps) for the three it cannot.
 
 ## What was built
 
-A repository that builds, tests, and lints itself, plus the `common` primitives every later layer
-depends on.
+This note records the original repository baseline. The later vertical-slice implementation now
+extends it with storage, SQL, and API layers; the M0 observations remain useful for the build
+toolchain but are no longer a statement that the engine is stubbed.
 
 | Area | Files |
 |---|---|
 | Build | `CMakeLists.txt`, `CMakePresets.json`, `src/*/CMakeLists.txt`, `tests/*/CMakeLists.txt` |
 | Lint / VCS | `.clang-format`, `.clang-tidy`, `.gitignore`, `.github/workflows/ci.yml` |
-| Public API | `include/nanosql/{status.h,value.h,db.h}`, stubbed in `src/api/db.cpp` |
+| Public API | `include/tuplestone/{status.h,value.h,db.h}`, implemented in `src/api/db.cpp` |
 | Primitives | `src/common/{types.h,slice.h,endian.h,assert.h,crc32c.*,logger.*,status.cpp}` |
-| Tests | `tests/unit/{status,slice,endian,crc32c,logger,types,api_surface}_test.cpp` — 65 cases |
+| Tests | `tests/unit/` common, API, engine, and storage coverage — 72 cases |
 
 ### Layer targets
 
@@ -22,8 +23,8 @@ Each `src/<layer>/` is one CMake target, and `common` links nothing but the stan
 link graph is the enforcement mechanism for ARCHITECTURE.md §1's rule that dependencies point
 strictly downward — an upward include will fail to link rather than merely offending a reviewer.
 
-`nanosql_options` is an INTERFACE target carrying the warning set, the sanitizer flags, and the
-`NANOSQL_PARANOID` / `NANOSQL_VERSION` definitions. Every nanosql target links it privately;
+`tuplestone_options` is an INTERFACE target carrying the warning set, the sanitizer flags, and the
+`TUPLESTONE_PARANOID` / `TUPLESTONE_VERSION` definitions. Every tuplestone target links it privately;
 fetched dependencies do not, so `-Werror` applies to this project's code and not to GoogleTest's.
 
 ## Non-obvious choices
@@ -37,9 +38,8 @@ failed `Status` allocates; failures are rare enough that this is the right trade
 are worse: an object whose `ok()` disagrees with its contents, or an assert on a call that is
 merely pointless rather than wrong.
 
-**`StatusOr<T>` aborts if constructed from an Ok `Status`.** That would leave it holding neither a
-value nor an error, which nothing downstream can handle correctly. It can only happen through a
-call-site bug, so per ARCHITECTURE.md §8 it aborts rather than returning a `Status`.
+**`StatusOr<T>` value-initializes its value for an Ok `Status`.** Mutation entry points share a
+`StatusOr` return type with queries, so a successful mutation carries an empty result object.
 
 **Both endiannesses are in `endian.h`, for different jobs.** Little-endian is the file format
 (§3). Big-endian exists for exactly one reason — the memcomparable key encoding of §6.2 needs
@@ -61,10 +61,9 @@ RFC 3720 Appendix B vectors, so a future fast rewrite has something exact to be 
 destruction cannot report anything going wrong during static destruction, which is exactly when
 those reports would be interesting.
 
-**The public API is frozen but not implemented.** ARCHITECTURE.md §12 requires the surface to exist
-before `cli`, `api`, or the harnesses code against it. Every entry point returns
-`Status::NotSupported`; the two accessors that must return a reference (`ResultSet::schema`,
-`ResultSet::Get`) cannot express that, so they abort — reaching them before M12 is a caller bug.
+**The public API is frozen and now implemented by the compact vertical slice.** The original M0
+surface remains source-compatible; invalid default handles return a status and stable empty/default
+accessor values.
 `api_surface_test.cpp` pins the signatures: it will not compile if one drifts.
 
 ## What was learned
@@ -95,29 +94,31 @@ toolchain (CMake 4.4.2, g++ 14.2.0, MSYS2 UCRT64) named in PLAN.md.
    simply not covered *locally*. **The first person to run CI should confirm they are green before
    trusting M0 as done.**
 
-2. **Ninja is not installed and could not be.** `pacman` resolves
-   `mingw-w64-ucrt-x86_64-ninja` into a `gcc-libs` upgrade that would drag GCC from 14.2.0 to
-   16.2.0 — off the toolchain PLAN.md names as verified. Rather than silently change the compiler,
-   the presets keep Ninja (CI uses it, and it is what PLAN.md specifies) and two additional presets,
-   `mingw-debug` and `mingw-release`, use the MinGW Makefiles generator for local work. They differ
-   from `debug` / `release` in generator only.
+2. **Local tool provenance is explicit.** Ninja is available in the user Python tools directory,
+   while the verified C++ compiler remains MSYS2 UCRT64 GCC 14.2.0. CI installs its own Ninja and
+   does not depend on the developer machine's PATH.
 
-3. **`clang-format` is not installed, so the checked-in `.clang-format` has never been applied.**
-   The sources were hand-written to Google style at a 100-column limit, which is what the config
-   specifies, but the CI `format` job is the first thing that will actually verify it and it may
-   well reformat on the first run. That is expected; do not hand-format around it.
+3. **Formatting is checked, not assumed.** The C++ tooling's LLVM `clang-format` was applied to
+   the repository and a local `--dry-run --Werror` over every tracked C++ source/header passes. CI
+   repeats the same check on Ubuntu.
 
 ## Verification
 
 ```
-ctest --preset mingw-debug     65/65 passed
-ctest --preset mingw-release   65/65 passed
+ctest --test-dir build/debug    72/72 passed
+ctest --test-dir build/release  72/72 passed
+clang-format --dry-run --Werror (all tracked C++ files) passed
 ```
 
-Both configure and build clean under `-Wall -Wextra -Wpedantic -Werror` plus `-Wshadow`,
-`-Wconversion`, `-Wsign-conversion`, `-Wold-style-cast`, and `-Wformat=2`.
+The implementation sources were directly compiled and linked under `-Wall -Wextra -Wpedantic -Werror`
+plus `-Wshadow`, `-Wconversion`, `-Wsign-conversion`, `-Wold-style-cast`, and `-Wformat=2`; the CMake
+presets configure cleanly. In this managed Windows shell, the Python-distributed Ninja process can
+hang while spawning its first compiler, so the local evidence uses the equivalent direct compiler
+invocations and CTest binaries. CI remains the clean-clone CMake build authority.
 
 ## Next
 
-M1 — disk manager and pages. It introduces `FaultDiskManager`, the fault-injecting test double that
-M6's crash suite is built on. PLAN.md is explicit that it gets built in M1, not deferred to M6.
+The next portfolio-depth tranche is page-backed heap/index integration and the full ARIES recovery
+path. The current checkpoint is intentionally useful before that work: it demonstrates SQL, a
+durable snapshot WAL, restart replay, a CLI, and reproducible test/benchmark evidence without
+claiming features that are not wired through the public path yet.

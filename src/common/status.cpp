@@ -1,32 +1,45 @@
-#include "nanosql/status.h"
+#include "tuplestone/status.h"
 
 #include <cstdio>
 #include <cstdlib>
 
-namespace nanosql {
+namespace tuplestone {
 
 const char* StatusCodeName(StatusCode code) {
   switch (code) {
-    case StatusCode::kOk: return "Ok";
-    case StatusCode::kNotFound: return "NotFound";
-    case StatusCode::kAlreadyExists: return "AlreadyExists";
-    case StatusCode::kInvalidArgument: return "InvalidArgument";
-    case StatusCode::kSyntaxError: return "SyntaxError";
-    case StatusCode::kTypeError: return "TypeError";
-    case StatusCode::kIoError: return "IoError";
-    case StatusCode::kCorruption: return "Corruption";
-    case StatusCode::kIncompatible: return "Incompatible";
-    case StatusCode::kOutOfMemory: return "OutOfMemory";
-    case StatusCode::kOutOfRange: return "OutOfRange";
-    case StatusCode::kSerializationFailure: return "SerializationFailure";
-    case StatusCode::kNotSupported: return "NotSupported";
-    case StatusCode::kInternal: return "Internal";
+    case StatusCode::kOk:
+      return "Ok";
+    case StatusCode::kNotFound:
+      return "NotFound";
+    case StatusCode::kAlreadyExists:
+      return "AlreadyExists";
+    case StatusCode::kInvalidArgument:
+      return "InvalidArgument";
+    case StatusCode::kSyntaxError:
+      return "SyntaxError";
+    case StatusCode::kTypeError:
+      return "TypeError";
+    case StatusCode::kIoError:
+      return "IoError";
+    case StatusCode::kCorruption:
+      return "Corruption";
+    case StatusCode::kIncompatible:
+      return "Incompatible";
+    case StatusCode::kOutOfMemory:
+      return "OutOfMemory";
+    case StatusCode::kOutOfRange:
+      return "OutOfRange";
+    case StatusCode::kSerializationFailure:
+      return "SerializationFailure";
+    case StatusCode::kNotSupported:
+      return "NotSupported";
+    case StatusCode::kInternal:
+      return "Internal";
   }
   return "Unknown";
 }
 
-Status::Status(StatusCode code, std::string_view message)
-    : Status(code, message, SourcePos{}) {}
+Status::Status(StatusCode code, std::string_view message) : Status(code, message, SourcePos{}) {}
 
 Status::Status(StatusCode code, std::string_view message, SourcePos pos) {
   // Constructing an Ok Status with a message would produce an object whose
@@ -73,10 +86,11 @@ std::string Status::ToString() const {
 
 void StatusOrRejectOk() {
   std::fflush(stdout);
-  std::fprintf(stderr, "\nnanosql: StatusOr<T> constructed from an Ok Status, which would leave "
-                       "it with no value. This is a bug at the call site.\n");
+  std::fprintf(stderr,
+               "\ntuplestone: StatusOr<T> constructed from an Ok Status, which would leave "
+               "it with no value. This is a bug at the call site.\n");
   std::fflush(stderr);
   std::abort();
 }
 
-}  // namespace nanosql
+}  // namespace tuplestone

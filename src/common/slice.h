@@ -1,8 +1,8 @@
 // A non-owning view of bytes. Distinct from std::string_view only in that it is
 // explicitly about *bytes*, not characters, and compares with memcmp — which is
 // exactly the operation the B+Tree performs on encoded keys (ARCHITECTURE.md §6.2).
-#ifndef NANOSQL_COMMON_SLICE_H_
-#define NANOSQL_COMMON_SLICE_H_
+#ifndef TUPLESTONE_COMMON_SLICE_H_
+#define TUPLESTONE_COMMON_SLICE_H_
 
 #include <cstddef>
 #include <cstdint>
@@ -10,7 +10,7 @@
 #include <string>
 #include <string_view>
 
-namespace nanosql {
+namespace tuplestone {
 
 class Slice {
  public:
@@ -40,9 +40,7 @@ class Slice {
     size_ -= n;
   }
 
-  std::string ToString() const {
-    return std::string(reinterpret_cast<const char*>(data_), size_);
-  }
+  std::string ToString() const { return std::string(reinterpret_cast<const char*>(data_), size_); }
   std::string_view ToStringView() const {
     return std::string_view(reinterpret_cast<const char*>(data_), size_);
   }
@@ -77,6 +75,6 @@ class Slice {
   size_t size_ = 0;
 };
 
-}  // namespace nanosql
+}  // namespace tuplestone
 
-#endif  // NANOSQL_COMMON_SLICE_H_
+#endif  // TUPLESTONE_COMMON_SLICE_H_

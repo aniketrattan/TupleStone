@@ -8,7 +8,7 @@
       "binaryDir": "${sourceDir}/build/${presetName}",
       "cacheVariables": {
         "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
-        "NANOSQL_BUILD_TESTS": "ON"
+        "TUPLESTONE_BUILD_TESTS": "ON"
       }
     },
     {
@@ -23,7 +23,7 @@
       "inherits": "ninja",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "NANOSQL_PARANOID": "ON"
+        "TUPLESTONE_PARANOID": "ON"
       }
     },
     {
@@ -32,8 +32,8 @@
       "inherits": "ninja",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-        "NANOSQL_PARANOID": "OFF",
-        "NANOSQL_BUILD_BENCH": "ON"
+        "TUPLESTONE_PARANOID": "OFF",
+        "TUPLESTONE_BUILD_BENCH": "ON"
       }
     },
     {
@@ -42,8 +42,8 @@
       "inherits": "ninja",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "NANOSQL_PARANOID": "ON",
-        "NANOSQL_SANITIZER": "address"
+        "TUPLESTONE_PARANOID": "ON",
+        "TUPLESTONE_SANITIZER": "address"
       }
     },
     {
@@ -52,8 +52,8 @@
       "inherits": "ninja",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "NANOSQL_PARANOID": "ON",
-        "NANOSQL_SANITIZER": "undefined"
+        "TUPLESTONE_PARANOID": "ON",
+        "TUPLESTONE_SANITIZER": "undefined"
       }
     },
     {
@@ -62,8 +62,8 @@
       "inherits": "ninja",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "NANOSQL_PARANOID": "OFF",
-        "NANOSQL_SANITIZER": "thread"
+        "TUPLESTONE_PARANOID": "OFF",
+        "TUPLESTONE_SANITIZER": "thread"
       }
     },
 
@@ -74,7 +74,7 @@
       "generator": "MinGW Makefiles",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Debug",
-        "NANOSQL_PARANOID": "ON"
+        "TUPLESTONE_PARANOID": "ON"
       }
     },
     {
@@ -84,7 +84,7 @@
       "generator": "MinGW Makefiles",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-        "NANOSQL_PARANOID": "OFF"
+        "TUPLESTONE_PARANOID": "OFF"
       }
     }
   ],

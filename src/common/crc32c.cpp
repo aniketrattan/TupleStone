@@ -2,7 +2,7 @@
 
 #include <array>
 
-namespace nanosql {
+namespace tuplestone {
 namespace {
 
 // Reflected Castagnoli polynomial. The bit-reversed form lets the update step
@@ -42,4 +42,4 @@ uint32_t Crc32c(const uint8_t* data, size_t size) {
   return Crc32cExtend(0, data, size);
 }
 
-}  // namespace nanosql
+}  // namespace tuplestone

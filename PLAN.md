@@ -1,4 +1,4 @@
-# nanosql — Project Plan
+# TupleStone — Project Plan
 
 > An embedded, ACID, MVCC relational database with a real SQL front end, written from scratch in
 > C++20 with no third-party runtime dependencies.
@@ -14,25 +14,41 @@ each step. Companion documents:
 
 ## 1. Project identity
 
+The project name is **TupleStone**. It is the current public identity for the namespace, library,
+shell, documentation, and on-disk format.
+
 | | |
 |---|---|
-| Name | `nanosql` |
-| Namespace | `nanosql::` |
-| Library | `libnanosql` (static) |
-| CLI binary | `nanosql` |
+| Name | `tuplestone` |
+| Namespace | `tuplestone::` |
+| Library | `libtuplestone` (static) |
+| CLI binary | `tuplestone` |
 | Language | C++20 |
 | Build | CMake ≥ 3.25 + Ninja |
 | Verified toolchain | CMake 4.4.2, g++ 14.2.0 (MSYS2 UCRT64), git, python3 |
 
-> **Renaming:** if you want a different project name, do it at M0 — it is a single find/replace
-> across a handful of files. After M1 it touches the on-disk magic string and is no longer free.
+> **Renaming:** a future product rename is a compatibility decision because the on-disk markers and
+> public namespace are now established. Record one in an ADR before changing them.
+
+### Current implementation checkpoint (2026-09-02)
+
+The repository currently has a working vertical slice rather than a completed M0–M12 engine:
+
+- M1/M2-style checksummed page, free-list, buffer-pool, heap, ordered-index, and transaction
+  primitives are implemented and unit-tested.
+- The public API has typed values, core DDL/DML, prepared parameters, expression evaluation,
+  copy-on-write transactions, a CLI, and durable snapshot WAL/restart replay.
+- The SQL path does **not** yet claim page-backed heap/index integration, tuple-version MVCC, or
+  ARIES redo/undo. Index DDL returns `NotSupported` until it can be maintained correctly.
+- The current evidence package is `docs/PORTFOLIO.md`, `tools/demo.ps1`, and the optional
+  dependency-free `tuplestone_bench` target.
 
 ### What this is
 
-A single-file-per-database embedded relational engine, in the shape of SQLite but with Postgres-style
-MVCC. You link `libnanosql` into a program, or you drive it from the `nanosql` shell. It parses real
-SQL, plans it, executes it over a paged B+Tree-indexed heap store, and survives `kill -9` without
-losing committed data.
+A single-file-per-database embedded relational engine, in the shape of SQLite, with a roadmap toward
+Postgres-style MVCC. You link `libtuplestone` into a program, or you drive it from the `tuplestone` shell.
+The current vertical slice parses and evaluates a useful SQL subset over copy-on-write snapshots;
+the page-backed heap/index path and tuple-version MVCC remain explicit follow-up milestones.
 
 ### Non-goals (do not build these)
 
@@ -65,12 +81,12 @@ layer depends on.
 
 **Introduces**
 - `CMakeLists.txt`, `CMakePresets.json` with presets: `debug`, `release`, `asan`, `ubsan`, `tsan`.
-- `FetchContent` for GoogleTest and Google Benchmark (test-only dependencies).
+- `FetchContent` for GoogleTest (test-only); the current benchmark smoke target is dependency-free.
 - Warnings-as-errors: `-Wall -Wextra -Wpedantic -Werror` (`/W4 /WX` on MSVC).
 - `.clang-format`, `.clang-tidy`, `.gitignore`, `.github/workflows/ci.yml`, `README.md`.
 - `git init` and an initial commit.
 - `src/common/`: `Status` / `StatusOr<T>`, `Slice`, `crc32c`, little-endian load/store helpers,
-  a minimal logger, `NANOSQL_ASSERT` / `NANOSQL_PARANOID_ASSERT`.
+  a minimal logger, `TUPLESTONE_ASSERT` / `TUPLESTONE_PARANOID_ASSERT`.
 
 **Exit criterion**
 `ctest` is green under every preset with the `common` unit tests, and CI passes on a clean clone.
@@ -85,7 +101,7 @@ layer depends on.
 
 **Introduces**
 - `src/disk/`: `Page` (4 KiB, `kPageSize`), `page_id_t` (`uint32_t`), `kInvalidPageId`.
-- File header page (page 0): magic `NANOSQL1`, format version, page count, free-list head,
+- File header page (page 0): magic `TSTONE01`, format version, page count, free-list head,
   next txn id, checkpoint LSN. Layout is frozen in ARCHITECTURE.md.
 - `DiskManager`: allocate / read / write / free a page, `Sync()` (real `fsync`/`FlushFileBuffers`),
   free-page list threaded through freed pages.
@@ -256,7 +272,7 @@ in the design note and name SSI as future work.
 **Goal:** the database describes its own schema, transactionally, in its own tables.
 
 **Introduces**
-- `src/catalog/`: system tables `nanosql_tables`, `nanosql_columns`, `nanosql_indexes` — stored as
+- `src/catalog/`: system tables `tuplestone_tables`, `tuplestone_columns`, `tuplestone_indexes` — stored as
   ordinary heap tables with fixed, hardcoded `table_id`s, bootstrapped on first open.
 - `Schema`, `Column`, `TableInfo`, `IndexInfo`.
 - In-memory schema cache invalidated on DDL commit.
@@ -349,14 +365,14 @@ joins with no matches, sort spilling, and the update-then-query paths.
 **Goal:** something a person can actually use and a reviewer can actually evaluate.
 
 **Introduces**
-- `include/nanosql/db.h` — the public surface, frozen back in M0 (see ARCHITECTURE.md):
+- `include/tuplestone/db.h` — the public surface, frozen back in M0 (see ARCHITECTURE.md):
   `Database`, `Connection`, `Transaction`, `PreparedStatement`, `ResultSet`. Exception-free,
   `Status`-based.
-- `src/cli/`: the `nanosql` REPL — multi-line statement accumulation, history, aligned result tables,
+- `src/cli/`: the `tuplestone` REPL — multi-line statement accumulation, history, aligned result tables,
   and dot-commands: `.tables`, `.schema [table]`, `.indexes`, `.timer on|off`, `.explain`,
   `.import <csv> <table>`, `.dump`, `.read <file>`, `.help`, `.quit`.
-- `tests/bench/`: Google Benchmark micro-benchmarks (B+Tree point lookup, buffer pool hit path, tuple
-  serialization) plus a YCSB-flavored macro benchmark and a TPC-C-lite `NewOrder`/`Payment` load.
+- `tests/bench/`: the current dependency-free public-API smoke benchmark; the planned full suite will
+  cover B+Tree point lookup, buffer-pool hits, tuple serialization, and macro workloads.
 - `README.md`: architecture diagram, build instructions, a demo transcript, benchmark numbers, honest
   limitations, and future work.
 
@@ -409,10 +425,10 @@ crashed goes into the corpus permanently.
 transaction manager). A TSan report is a build failure, never a "known flake".
 
 **Invariant checkers** — `Validate()` on the B+Tree, heap pages, and the free list, compiled in under
-`NANOSQL_PARANOID` and called after every mutation in debug tests.
+`TUPLESTONE_PARANOID` and called after every mutation in debug tests.
 
-**Benchmarks** — Google Benchmark; results committed to `docs/bench/` with the commit hash and
-machine, so regressions are visible over time.
+**Benchmarks** — the current smoke benchmark is dependency-free and records its workload and machine
+context in `docs/bench/`; a Google Benchmark suite is a later performance milestone.
 
 **CI matrix** — Linux (GCC + Clang) and Windows (MSYS2 UCRT64). Build all presets, run `ctest`, run
 each fuzzer for 60 s as a smoke test, check `clang-format`.

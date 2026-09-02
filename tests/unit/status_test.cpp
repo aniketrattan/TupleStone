@@ -1,4 +1,4 @@
-#include "nanosql/status.h"
+#include "tuplestone/status.h"
 
 #include <algorithm>
 #include <memory>
@@ -8,7 +8,7 @@
 
 #include <gtest/gtest.h>
 
-namespace nanosql {
+namespace tuplestone {
 namespace {
 
 TEST(StatusTest, DefaultIsOk) {
@@ -20,7 +20,9 @@ TEST(StatusTest, DefaultIsOk) {
   EXPECT_EQ(s.ToString(), "Ok");
 }
 
-TEST(StatusTest, OkFactoryMatchesDefault) { EXPECT_EQ(Status::Ok(), Status()); }
+TEST(StatusTest, OkFactoryMatchesDefault) {
+  EXPECT_EQ(Status::Ok(), Status());
+}
 
 TEST(StatusTest, CarriesCodeAndMessage) {
   const Status s = Corruption("page 7 failed its checksum");
@@ -79,11 +81,20 @@ TEST(StatusTest, EqualityComparesCodeMessageAndPosition) {
 
 TEST(StatusTest, EveryCodeHasADistinctName) {
   const std::vector<StatusCode> all = {
-      StatusCode::kOk,           StatusCode::kNotFound,     StatusCode::kAlreadyExists,
-      StatusCode::kInvalidArgument, StatusCode::kSyntaxError, StatusCode::kTypeError,
-      StatusCode::kIoError,      StatusCode::kCorruption,   StatusCode::kIncompatible,
-      StatusCode::kOutOfMemory,  StatusCode::kOutOfRange,   StatusCode::kSerializationFailure,
-      StatusCode::kNotSupported, StatusCode::kInternal,
+      StatusCode::kOk,
+      StatusCode::kNotFound,
+      StatusCode::kAlreadyExists,
+      StatusCode::kInvalidArgument,
+      StatusCode::kSyntaxError,
+      StatusCode::kTypeError,
+      StatusCode::kIoError,
+      StatusCode::kCorruption,
+      StatusCode::kIncompatible,
+      StatusCode::kOutOfMemory,
+      StatusCode::kOutOfRange,
+      StatusCode::kSerializationFailure,
+      StatusCode::kNotSupported,
+      StatusCode::kInternal,
   };
   std::vector<std::string> names;
   for (const StatusCode code : all) {
@@ -124,10 +135,12 @@ TEST(StatusOrTest, ArrowReachesMembers) {
 
 namespace {
 
-Status FailsWith(StatusCode code) { return Status(code, "propagated"); }
+Status FailsWith(StatusCode code) {
+  return Status(code, "propagated");
+}
 
 Status UsesReturnIfError(bool fail) {
-  NANOSQL_RETURN_IF_ERROR(fail ? FailsWith(StatusCode::kIoError) : Status::Ok());
+  TUPLESTONE_RETURN_IF_ERROR(fail ? FailsWith(StatusCode::kIoError) : Status::Ok());
   return Status::Ok();
 }
 
@@ -137,7 +150,7 @@ StatusOr<int> MaybeInt(bool fail) {
 }
 
 StatusOr<int> UsesAssignOrReturn(bool fail) {
-  NANOSQL_ASSIGN_OR_RETURN(const int n, MaybeInt(fail));
+  TUPLESTONE_ASSIGN_OR_RETURN(const int n, MaybeInt(fail));
   return n * 2;
 }
 
@@ -159,4 +172,4 @@ TEST(StatusMacroTest, AssignOrReturnUnwrapsOrPropagates) {
 }
 
 }  // namespace
-}  // namespace nanosql
+}  // namespace tuplestone

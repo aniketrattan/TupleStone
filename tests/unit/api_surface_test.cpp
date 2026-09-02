@@ -1,23 +1,21 @@
-// The public API is frozen at M0 (ARCHITECTURE.md §12) but implemented at M12.
-// This test pins the surface: it will not compile if a signature drifts, and it
-// asserts that every unimplemented entry point reports NotSupported rather than
-// pretending to succeed.
-#include "nanosql/db.h"
+// The public API is frozen at M0 and exercised here against the embedded engine.
+#include "tuplestone/db.h"
 
+#include <filesystem>
 #include <memory>
 #include <type_traits>
 
 #include <gtest/gtest.h>
 
-#include "nanosql/status.h"
-#include "nanosql/value.h"
+#include "tuplestone/status.h"
+#include "tuplestone/value.h"
 
-namespace nanosql {
+namespace tuplestone {
 namespace {
 
 TEST(ApiSurfaceTest, OptionsHaveTheDocumentedDefaults) {
   const Options options;
-  EXPECT_EQ(options.buffer_pool_pages, 4096u);   // 16 MiB at 4 KiB pages
+  EXPECT_EQ(options.buffer_pool_pages, 4096u);  // 16 MiB at 4 KiB pages
   EXPECT_EQ(options.sort_memory_bytes, 64u << 20);
   EXPECT_TRUE(options.create_if_missing);
   EXPECT_TRUE(options.sync_on_commit);
@@ -40,30 +38,38 @@ TEST(ApiSurfaceTest, ResultAndStatementHandlesAreMovable) {
 }
 
 // Nothing in the public API may throw (ARCHITECTURE.md §8).
-TEST(ApiSurfaceTest, OpenReportsNotSupportedRatherThanThrowing) {
-  const StatusOr<std::unique_ptr<Database>> db = Database::Open("scratch.db");
-  ASSERT_FALSE(db.ok());
-  EXPECT_EQ(db.status().code(), StatusCode::kNotSupported);
+TEST(ApiSurfaceTest, OpenCreatesAnEmbeddedDatabase) {
+  // Keep this smoke test independent of stale files left by an earlier build
+  // (including databases written before a format/name change).
+  const std::filesystem::path path = "tuplestone_api_surface.db";
+  std::error_code error;
+  std::filesystem::remove(path, error);
+  std::filesystem::remove(path.string() + ".wal", error);
+  const StatusOr<std::unique_ptr<Database>> db = Database::Open(path.string());
+  ASSERT_TRUE(db.ok()) << db.status().ToString();
+  EXPECT_TRUE((*db)->Close().ok());
+  std::filesystem::remove(path, error);
+  std::filesystem::remove(path.string() + ".wal", error);
 }
 
-TEST(ApiSurfaceTest, UnimplementedEntryPointsAllReportNotSupported) {
+TEST(ApiSurfaceTest, DefaultHandlesReportInvalidUse) {
   ResultSet result_set;
-  EXPECT_EQ(result_set.Next().status().code(), StatusCode::kNotSupported);
+  EXPECT_EQ(result_set.Next().status().code(), StatusCode::kInvalidArgument);
   EXPECT_TRUE(result_set.Close().ok());
 
   PreparedStatement statement;
-  EXPECT_EQ(statement.Execute().status().code(), StatusCode::kNotSupported);
-  EXPECT_EQ(statement.Reset().code(), StatusCode::kNotSupported);
+  EXPECT_EQ(statement.Execute().status().code(), StatusCode::kInvalidArgument);
+  EXPECT_EQ(statement.Reset().code(), StatusCode::kInvalidArgument);
 
   Transaction txn;
-  EXPECT_EQ(txn.Commit().code(), StatusCode::kNotSupported);
-  EXPECT_EQ(txn.Rollback().code(), StatusCode::kNotSupported);
+  EXPECT_EQ(txn.Commit().code(), StatusCode::kInvalidArgument);
+  EXPECT_TRUE(txn.Rollback().ok());
 }
 
 TEST(ApiSurfaceTest, VersionStringNamesTheProject) {
   const std::string version = VersionString();
-  EXPECT_NE(version.find("nanosql"), std::string::npos) << version;
+  EXPECT_NE(version.find("tuplestone"), std::string::npos) << version;
 }
 
 }  // namespace
-}  // namespace nanosql
+}  // namespace tuplestone

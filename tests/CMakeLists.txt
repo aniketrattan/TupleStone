@@ -15,10 +15,10 @@ FetchContent_MakeAvailable(googletest)
 
 include(GoogleTest)
 
-# Warnings-as-errors applies to nanosql's code, not to fetched dependencies.
-function(nanosql_add_test name)
+# Warnings-as-errors applies to tuplestone's code, not to fetched dependencies.
+function(tuplestone_add_test name)
   add_executable(${name} ${ARGN})
-  target_link_libraries(${name} PRIVATE nanosql nanosql_options GTest::gtest_main)
+  target_link_libraries(${name} PRIVATE tuplestone tuplestone_options GTest::gtest_main)
   gtest_discover_tests(${name}
     DISCOVERY_MODE PRE_TEST
     PROPERTIES TIMEOUT 300)
@@ -26,6 +26,6 @@ endfunction()
 
 add_subdirectory(unit)
 
-if(NANOSQL_BUILD_BENCH)
+if(TUPLESTONE_BUILD_BENCH)
   add_subdirectory(bench)
 endif()

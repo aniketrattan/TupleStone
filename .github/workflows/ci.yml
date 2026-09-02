@@ -56,6 +56,10 @@ jobs:
           UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
           TSAN_OPTIONS: halt_on_error=1:second_deadlock_stack=1
 
+      - name: Benchmark smoke
+        if: matrix.compiler == 'gcc' && matrix.preset == 'release'
+        run: build/release/bin/nanosql_bench ci-bench.db 1000
+
   windows:
     name: windows msys2 ucrt64 / ${{ matrix.preset }}
     runs-on: windows-latest

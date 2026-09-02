@@ -1,11 +1,11 @@
 // The identifier types every layer above `common` shares. ARCHITECTURE.md §3.
-#ifndef NANOSQL_COMMON_TYPES_H_
-#define NANOSQL_COMMON_TYPES_H_
+#ifndef TUPLESTONE_COMMON_TYPES_H_
+#define TUPLESTONE_COMMON_TYPES_H_
 
 #include <cstddef>
 #include <cstdint>
 
-namespace nanosql {
+namespace tuplestone {
 
 using page_id_t = uint32_t;
 using slot_id_t = uint16_t;
@@ -47,6 +47,6 @@ struct RID {
 
 constexpr size_t kRidSerializedSize = 6;
 
-}  // namespace nanosql
+}  // namespace tuplestone
 
-#endif  // NANOSQL_COMMON_TYPES_H_
+#endif  // TUPLESTONE_COMMON_TYPES_H_

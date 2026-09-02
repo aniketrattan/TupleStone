@@ -5,10 +5,12 @@
 
 #include <gtest/gtest.h>
 
-namespace nanosql {
+namespace tuplestone {
 namespace {
 
-Slice FromLiteral(const char* s) { return Slice(std::string_view(s)); }
+Slice FromLiteral(const char* s) {
+  return Slice(std::string_view(s));
+}
 
 TEST(SliceTest, DefaultIsEmpty) {
   const Slice s;
@@ -21,8 +23,7 @@ TEST(SliceTest, ViewsWithoutCopying) {
   const std::string owner = "hello";
   const Slice s(owner);
   EXPECT_EQ(s.size(), 5u);
-  EXPECT_EQ(reinterpret_cast<const void*>(s.data()),
-            reinterpret_cast<const void*>(owner.data()));
+  EXPECT_EQ(reinterpret_cast<const void*>(s.data()), reinterpret_cast<const void*>(owner.data()));
   EXPECT_EQ(s.ToString(), "hello");
   EXPECT_EQ(s.ToStringView(), "hello");
 }
@@ -103,4 +104,4 @@ TEST(SliceTest, OrderingMatchesStdStringForAsciiWithoutHighBytes) {
 }
 
 }  // namespace
-}  // namespace nanosql
+}  // namespace tuplestone

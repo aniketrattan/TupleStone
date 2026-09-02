@@ -8,7 +8,7 @@
 #include <mutex>
 #include <vector>
 
-namespace nanosql {
+namespace tuplestone {
 namespace {
 
 std::string_view BaseName(const char* path) {
@@ -21,12 +21,18 @@ std::string_view BaseName(const char* path) {
 
 const char* LogLevelName(LogLevel level) {
   switch (level) {
-    case LogLevel::kTrace: return "TRACE";
-    case LogLevel::kDebug: return "DEBUG";
-    case LogLevel::kInfo: return "INFO";
-    case LogLevel::kWarn: return "WARN";
-    case LogLevel::kError: return "ERROR";
-    case LogLevel::kOff: return "OFF";
+    case LogLevel::kTrace:
+      return "TRACE";
+    case LogLevel::kDebug:
+      return "DEBUG";
+    case LogLevel::kInfo:
+      return "INFO";
+    case LogLevel::kWarn:
+      return "WARN";
+    case LogLevel::kError:
+      return "ERROR";
+    case LogLevel::kOff:
+      return "OFF";
   }
   return "?";
 }
@@ -37,12 +43,30 @@ bool ParseLogLevel(std::string_view text, LogLevel* out) {
   for (const char c : text) {
     lowered.push_back(static_cast<char>(std::tolower(static_cast<unsigned char>(c))));
   }
-  if (lowered == "trace") { *out = LogLevel::kTrace; return true; }
-  if (lowered == "debug") { *out = LogLevel::kDebug; return true; }
-  if (lowered == "info") { *out = LogLevel::kInfo; return true; }
-  if (lowered == "warn" || lowered == "warning") { *out = LogLevel::kWarn; return true; }
-  if (lowered == "error") { *out = LogLevel::kError; return true; }
-  if (lowered == "off" || lowered == "none") { *out = LogLevel::kOff; return true; }
+  if (lowered == "trace") {
+    *out = LogLevel::kTrace;
+    return true;
+  }
+  if (lowered == "debug") {
+    *out = LogLevel::kDebug;
+    return true;
+  }
+  if (lowered == "info") {
+    *out = LogLevel::kInfo;
+    return true;
+  }
+  if (lowered == "warn" || lowered == "warning") {
+    *out = LogLevel::kWarn;
+    return true;
+  }
+  if (lowered == "error") {
+    *out = LogLevel::kError;
+    return true;
+  }
+  if (lowered == "off" || lowered == "none") {
+    *out = LogLevel::kOff;
+    return true;
+  }
   return false;
 }
 
@@ -57,8 +81,8 @@ class Logger::State {
 };
 
 Logger::Logger() : state_(new State()) {
-  // NANOSQL_LOG_LEVEL lets a test or a bug report raise verbosity without a rebuild.
-  if (const char* env = std::getenv("NANOSQL_LOG_LEVEL"); env != nullptr) {
+  // TUPLESTONE_LOG_LEVEL lets a test or a bug report raise verbosity without a rebuild.
+  if (const char* env = std::getenv("TUPLESTONE_LOG_LEVEL"); env != nullptr) {
     LogLevel parsed = LogLevel::kInfo;
     if (ParseLogLevel(env, &parsed)) state_->level.store(parsed, std::memory_order_relaxed);
   }
@@ -70,9 +94,13 @@ Logger& Logger::Global() {
   return *instance;
 }
 
-LogLevel Logger::level() const { return state_->level.load(std::memory_order_relaxed); }
+LogLevel Logger::level() const {
+  return state_->level.load(std::memory_order_relaxed);
+}
 
-void Logger::SetLevel(LogLevel level) { state_->level.store(level, std::memory_order_relaxed); }
+void Logger::SetLevel(LogLevel level) {
+  state_->level.store(level, std::memory_order_relaxed);
+}
 
 void Logger::SetStream(std::FILE* stream) {
   std::lock_guard<std::mutex> lock(state_->mu);
@@ -86,8 +114,8 @@ void Logger::Log(LogLevel level, const char* file, int line, std::string_view me
   // One fprintf per record: the mutex serializes callers, and a single call
   // keeps a record from being split across a flush.
   std::fprintf(state_->stream, "[%-5s] %.*s:%d: %.*s\n", LogLevelName(level),
-               static_cast<int>(base.size()), base.data(), line,
-               static_cast<int>(message.size()), message.data());
+               static_cast<int>(base.size()), base.data(), line, static_cast<int>(message.size()),
+               message.data());
 }
 
 std::string StringPrintf(const char* format, ...) {
@@ -109,4 +137,4 @@ std::string StringPrintf(const char* format, ...) {
   return result;
 }
 
-}  // namespace nanosql
+}  // namespace tuplestone

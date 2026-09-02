@@ -1,4 +1,4 @@
-# nanosql — Architecture
+# TupleStone — Architecture
 
 **This document is the frozen technical design.** Its job is to stop every future contributor from
 re-litigating decisions that have already been made. If you are implementing a milestone from
@@ -7,6 +7,11 @@ to invent a page layout or a log record format yourself.
 
 Changing anything in this document requires an ADR in `docs/adr/NNNN-<title>.md` and explicit human
 approval. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+The architecture below is the target design for the roadmap. As of the current portfolio checkpoint,
+the public path is the compact snapshot implementation documented in
+[`docs/PORTFOLIO.md`](docs/PORTFOLIO.md); page-backed heap/index integration, tuple-version MVCC, and
+physiological ARIES recovery are not yet claimed as complete.
 
 ---
 
@@ -53,7 +58,7 @@ dependencies fail to link.
 d:\Database\
 ├─ PLAN.md ARCHITECTURE.md CONTRIBUTING.md README.md
 ├─ CMakeLists.txt  CMakePresets.json  .clang-format  .clang-tidy  .gitignore
-├─ include/nanosql/          # PUBLIC headers only — the embedded API surface
+├─ include/tuplestone/          # PUBLIC headers only — the embedded API surface
 │    db.h  status.h  value.h
 ├─ src/
 │    common/  disk/  buffer/  wal/  table/  index/  txn/
@@ -63,7 +68,7 @@ d:\Database\
 │    slt/                    # *.slt sqllogictest-style files
 │    fuzz/                   # libFuzzer targets + corpus/
 │    crash/                  # crash-injection harness
-│    bench/                  # Google Benchmark
+│    bench/                  # dependency-free smoke benchmark (full suite is future work)
 ├─ tools/                    # slt_runner, crash_harness, csv loader
 └─ docs/
      design/                 # NN-<name>.md, one per milestone
@@ -71,7 +76,7 @@ d:\Database\
      bench/                  # benchmark results over time
 ```
 
-Each `src/<layer>/` is one CMake target named `nanosql_<layer>`, linked into `libnanosql`.
+Each `src/<layer>/` is one CMake target named `tuplestone_<layer>`, linked into `libtuplestone`.
 
 ---
 
@@ -111,7 +116,7 @@ struct RID {                  // stable row address; what indexes store
 
 | Offset | Size | Field |
 |---:|---:|---|
-| 0 | 8 | Magic `"NANOSQL1"` (ASCII, no NUL) |
+| 0 | 8 | Magic `"TSTONE01"` (ASCII, no NUL) |
 | 8 | 1 | Format version (currently `1`) |
 | 9 | 1 | Page size log2 (currently `12`) |
 | 10 | 2 | Reserved (zero) |
@@ -121,9 +126,9 @@ struct RID {                  // stable row address; what indexes store
 | 28 | 8 | Last checkpoint LSN |
 | 36 | 4 | Next `table_id` |
 | 40 | 4 | Next `index_id` |
-| 44 | 4 | Catalog root: `nanosql_tables` first page |
-| 48 | 4 | Catalog root: `nanosql_columns` first page |
-| 52 | 4 | Catalog root: `nanosql_indexes` first page |
+| 44 | 4 | Catalog root: `tuplestone_tables` first page |
+| 48 | 4 | Catalog root: `tuplestone_columns` first page |
+| 52 | 4 | Catalog root: `tuplestone_indexes` first page |
 | 56 | 4036 | Reserved (zero) |
 | 4092 | 4 | CRC32C of bytes 0..4091 |
 
@@ -413,15 +418,15 @@ The M6 crash suite tests exactly this by injecting a second crash during the rec
 
 ## 8. Error handling
 
-- **No exception ever crosses the public API.** `libnanosql` is built with exceptions enabled (STL
+- **No exception ever crosses the public API.** `libtuplestone` is built with exceptions enabled (STL
   needs them) but every public entry point catches `std::bad_alloc` and translates it.
 - `Status` for recoverable failures; `StatusOr<T>` when a value is returned.
   Codes: `Ok, NotFound, AlreadyExists, InvalidArgument, SyntaxError, TypeError, IoError, Corruption,
   Incompatible, OutOfMemory, OutOfRange, SerializationFailure, NotSupported, Internal`.
 - `Status` carries a message and, for SQL errors, a `line:column` position.
-- **`NANOSQL_ASSERT` is for invariants that a bug would break** — a violated internal contract. It is
-  active in all builds including release. `NANOSQL_PARANOID_ASSERT` wraps expensive checks
-  (`Validate()` calls) and is compiled out unless `NANOSQL_PARANOID` is set.
+- **`TUPLESTONE_ASSERT` is for invariants that a bug would break** — a violated internal contract. It is
+  active in all builds including release. `TUPLESTONE_PARANOID_ASSERT` wraps expensive checks
+  (`Validate()` calls) and is compiled out unless `TUPLESTONE_PARANOID` is set.
 - The division of labor: **I/O errors, corruption, and resource exhaustion are `Status`.
   Logic bugs are asserts.** Never return a `Status` for something that can only happen if the code is
   wrong, and never assert on something the environment can cause.
@@ -492,10 +497,10 @@ Expression parsing uses precedence climbing. Precedence, loosest to tightest:
 Three system tables, stored as ordinary heap tables with hardcoded ids, bootstrapped on first open:
 
 ```
-nanosql_tables  (table_id INTEGER, name TEXT, first_page INTEGER, tuple_count INTEGER)
-nanosql_columns (table_id INTEGER, ordinal INTEGER, name TEXT, type INTEGER,
+tuplestone_tables  (table_id INTEGER, name TEXT, first_page INTEGER, tuple_count INTEGER)
+tuplestone_columns (table_id INTEGER, ordinal INTEGER, name TEXT, type INTEGER,
                  nullable BOOLEAN, is_primary BOOLEAN)
-nanosql_indexes (index_id INTEGER, table_id INTEGER, name TEXT, root_page INTEGER,
+tuplestone_indexes (index_id INTEGER, table_id INTEGER, name TEXT, root_page INTEGER,
                  is_unique BOOLEAN, column_ordinals TEXT)
 ```
 
@@ -518,11 +523,11 @@ sits *above* everything in §7.1's latch order (take it before any page latch).
 
 ## 12. Public API — frozen at M0
 
-`include/nanosql/db.h`. `cli`, `api`, and the test harnesses all code against this, so it must exist
+`include/tuplestone/db.h`. `cli`, `api`, and the test harnesses all code against this, so it must exist
 before any of them do, even as a header with unimplemented stubs.
 
 ```cpp
-namespace nanosql {
+namespace tuplestone {
 
 struct Options {
   size_t buffer_pool_pages   = 4096;    // 16 MiB at 4 KiB pages
@@ -571,7 +576,7 @@ class ResultSet {
   Status            Close();
 };
 
-}  // namespace nanosql
+}  // namespace tuplestone
 ```
 
 Every method returns `Status` or `StatusOr`. Nothing throws. Nothing returns a raw owning pointer.

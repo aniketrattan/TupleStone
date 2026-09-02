@@ -1,4 +1,4 @@
-# CONTRIBUTING.md — rules for agents working on nanosql
+# CONTRIBUTING.md — rules for agents working on TupleStone
 
 Read this before writing any code in this repository.
 
@@ -35,8 +35,9 @@ haven't diagnosed" is a useful status. "Done" when TSan is red is not.
 ## Code rules
 
 - **C++20.** No compiler extensions.
-- **No third-party runtime dependencies.** GoogleTest and Google Benchmark are test-only, pulled via
-  `FetchContent`. Nothing else gets added without an ADR — writing it yourself *is* the project.
+- **No third-party runtime dependencies.** GoogleTest is test-only and pulled via `FetchContent`; the
+  current benchmark smoke target is dependency-free. Nothing else gets added without an ADR — writing
+  it yourself *is* the project.
 - **RAII for every resource.** No raw `new`/`delete`. No manual `close()`/`unlatch()` paths that an
   early return can skip.
 - **No naked `Page*` outside `src/buffer/`.** Always a `PageGuard`. A `PageGuard` never outlives the
@@ -58,7 +59,7 @@ haven't diagnosed" is a useful status. "Done" when TSan is red is not.
 | Private members | trailing underscore — `page_table_`, `pool_size_` |
 | Constants | `kPascalCase` — `kPageSize`, `kInvalidPageId` |
 | Files | `snake_case.cpp` / `.h` |
-| Macros | `NANOSQL_SCREAMING` |
+| Macros | `TUPLESTONE_SCREAMING` |
 
 `.clang-format` is authoritative and checked in CI. Do not hand-format around it.
 

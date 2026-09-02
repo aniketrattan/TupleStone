@@ -7,12 +7,14 @@
 
 #include <gtest/gtest.h>
 
-namespace nanosql {
+namespace tuplestone {
 namespace {
 
 constexpr uint64_t kSeed = 0x63726333326300ull;
 
-Slice Bytes(const std::string& s) { return Slice(s); }
+Slice Bytes(const std::string& s) {
+  return Slice(s);
+}
 
 // The published CRC32C check value. If this fails, the polynomial or the
 // reflection is wrong and every checksum in the file format is wrong with it.
@@ -98,4 +100,4 @@ TEST(Crc32cTest, DiffersForDifferentLengthsOfZeros) {
 }
 
 }  // namespace
-}  // namespace nanosql
+}  // namespace tuplestone

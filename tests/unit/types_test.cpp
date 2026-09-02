@@ -6,9 +6,9 @@
 #include <gtest/gtest.h>
 
 #include "common/endian.h"
-#include "nanosql/value.h"
+#include "tuplestone/value.h"
 
-namespace nanosql {
+namespace tuplestone {
 namespace {
 
 TEST(TypesTest, PageSizeConstantsAgree) {
@@ -90,4 +90,4 @@ TEST(TypeIdTest, NamesMatchTheSqlSpelling) {
 }
 
 }  // namespace
-}  // namespace nanosql
+}  // namespace tuplestone

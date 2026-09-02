@@ -3,13 +3,13 @@
 #include <cstdio>
 #include <cstdlib>
 
-namespace nanosql::internal {
+namespace tuplestone::internal {
 
 void AssertionFailed(const char* file, int line, const char* func, const char* expr,
                      const char* message) {
   std::fflush(stdout);
   std::fprintf(stderr,
-               "\nnanosql: assertion failed\n"
+               "\ntuplestone: assertion failed\n"
                "  at       %s:%d\n"
                "  in       %s\n"
                "  expected %s\n"
@@ -20,4 +20,4 @@ void AssertionFailed(const char* file, int line, const char* func, const char* e
   std::abort();
 }
 
-}  // namespace nanosql::internal
+}  // namespace tuplestone::internal
